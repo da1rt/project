@@ -1,0 +1,1975 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <title>Заметки + Календарь + Кликер</title>
+    <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
+    <style>
+        /* ===== ОПТИМИЗИРОВАННЫЕ ПЕРЕМЕННЫЕ ===== */
+        :root {
+            --bg-app: #0a0a1a;
+            --bg-content: #0f0f2a;
+            --bg-card: #1a1a3a;
+            --bg-input: #0f0f2a;
+            --bg-hover: #2a2a5a;
+            --bg-timeline-hover: #1a1a3a;
+            --bg-today: #3a1a3a;
+            --border-color: #4a4a8a;
+            --border-light: #3a3a7a;
+            --text-primary: #e0e0ff;
+            --text-secondary: #a0a0d0;
+            --text-muted: #6a6a9a;
+            --text-light: #4a4a7a;
+            --shadow: 0 4px 20px rgba(0, 0, 0, 0.4);
+            --shadow-modal: 0 4px 30px rgba(0, 0, 0, 0.6);
+            --shadow-search: 0 0 10px rgba(0, 240, 255, 0.1);
+            --shadow-search-focus: 0 0 15px rgba(0, 240, 255, 0.3);
+            --tag-bg: #2a2a6a;
+            --tag-color: #88ddff;
+            --tag-orange-bg: #4a2a1a;
+            --tag-orange-color: #ffaa66;
+            --tag-green-bg: #1a4a2a;
+            --tag-green-color: #66ffaa;
+            --tag-pink-bg: #4a1a3a;
+            --tag-pink-color: #ff88aa;
+            --toggle-bg: #3a3a7a;
+            --toggle-active: #00f0ff;
+            --accent: #00f0ff;
+            --accent-shadow: rgba(0, 240, 255, 0.3);
+            --calendar-border: #3a3a7a;
+            --day-other: #4a4a7a;
+            --quick-link-bg: #1a1a3a;
+            --quick-link-hover: #2a2a5a;
+            --recent-border: #2a2a5a;
+            --settings-border: #2a2a5a;
+            --google-border: #4a4a8a;
+            --google-placeholder: #6a6a9a;
+            --google-icon: #6a6a9a;
+            --clear-btn-color: #6a6a9a;
+            --modal-overlay: rgba(0,0,0,0.6);
+            --font-family: 'Press Start 2P', monospace;
+            --safe-bottom: env(safe-area-inset-bottom, 0px);
+        }
+
+        .light-theme {
+            --bg-app: #f0f4ff;
+            --bg-content: #e4ecfa;
+            --bg-card: #ffffff;
+            --bg-input: #ffffff;
+            --bg-hover: #d8e4f5;
+            --bg-timeline-hover: #eaf0fa;
+            --bg-today: #fff0e0;
+            --border-color: #4a7ab5;
+            --border-light: #8ab0d9;
+            --text-primary: #1a2a4a;
+            --text-secondary: #2a4a7a;
+            --text-muted: #5a7a9a;
+            --text-light: #8ab0d0;
+            --shadow: 0 4px 20px rgba(26, 115, 232, 0.15);
+            --shadow-modal: 0 4px 30px rgba(26, 115, 232, 0.2);
+            --shadow-search: 0 0 10px rgba(26, 115, 232, 0.1);
+            --shadow-search-focus: 0 0 15px rgba(26, 115, 232, 0.3);
+            --tag-bg: #d4e4ff;
+            --tag-color: #1a5a9a;
+            --tag-orange-bg: #ffebd0;
+            --tag-orange-color: #cc6600;
+            --tag-green-bg: #d0f0e0;
+            --tag-green-color: #008844;
+            --tag-pink-bg: #ffdce8;
+            --tag-pink-color: #cc3366;
+            --toggle-bg: #8ab0d0;
+            --toggle-active: #ff4466;
+            --accent: #ff4466;
+            --accent-shadow: rgba(255, 68, 102, 0.3);
+            --calendar-border: #8ab0d9;
+            --day-other: #aac0d8;
+            --quick-link-bg: #d8e4f5;
+            --quick-link-hover: #c0d4ed;
+            --recent-border: #c0d4ed;
+            --settings-border: #c0d4ed;
+            --google-border: #4a7ab5;
+            --google-placeholder: #7a9ab5;
+            --google-icon: #4a7ab5;
+            --clear-btn-color: #4a7ab5;
+            --modal-overlay: rgba(0,0,0,0.2);
+        }
+
+        /* ===== БАЗОВЫЕ СТИЛИ ===== */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        html, body {
+            height: 100%;
+            overflow: hidden;
+        }
+
+        body {
+            font-family: var(--font-family);
+            background: var(--bg-content);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 12px;
+            color: var(--text-primary);
+            transition: background 0.3s, color 0.3s;
+            image-rendering: pixelated;
+            touch-action: manipulation;
+            -webkit-user-select: none;
+            user-select: none;
+        }
+
+        .app-wrapper {
+            max-width: 480px;
+            width: 100%;
+            height: 100%;
+            max-height: 800px;
+            background: var(--bg-app);
+            border-radius: 16px;
+            box-shadow: var(--shadow);
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            border: 4px solid var(--border-color);
+            transition: background 0.3s, border-color 0.3s, box-shadow 0.3s;
+            will-change: transform;
+            transform: translateZ(0);
+            backface-visibility: hidden;
+        }
+
+        .content-area {
+            flex: 1;
+            padding: 16px 14px 8px;
+            overflow-y: auto;
+            -webkit-overflow-scrolling: touch;
+            background: var(--bg-content);
+            transition: background 0.3s;
+            will-change: transform;
+            transform: translateZ(0);
+            backface-visibility: hidden;
+            padding-bottom: calc(8px + var(--safe-bottom));
+        }
+
+        .content-area::-webkit-scrollbar {
+            width: 3px;
+        }
+        .content-area::-webkit-scrollbar-track {
+            background: var(--bg-card);
+        }
+        .content-area::-webkit-scrollbar-thumb {
+            background: var(--border-color);
+            border-radius: 0;
+        }
+
+        .screen {
+            display: none;
+            animation: screenFade 0.25s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+            will-change: transform, opacity;
+            transform: translateZ(0);
+        }
+        .screen.active {
+            display: block;
+        }
+
+        @keyframes screenFade {
+            from { opacity: 0; transform: scale(0.96); }
+            to { opacity: 1; transform: scale(1); }
+        }
+
+        /* ===== ШАПКА ===== */
+        .screen-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 14px;
+            padding-bottom: 8px;
+            border-bottom: 3px solid var(--border-color);
+            transition: border-color 0.3s;
+        }
+
+        .screen-header h2 {
+            font-size: clamp(14px, 3.5vw, 20px);
+            font-weight: 700;
+            letter-spacing: 0.5px;
+            color: var(--text-primary);
+            font-family: var(--font-family);
+        }
+
+        .screen-header .action-btn {
+            background: none;
+            border: 3px solid var(--border-color);
+            font-size: clamp(16px, 4vw, 22px);
+            width: clamp(36px, 9vw, 48px);
+            height: clamp(36px, 9vw, 48px);
+            border-radius: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: background 0.2s, border-color 0.2s, transform 0.2s;
+            color: var(--text-secondary);
+            background: var(--bg-card);
+            font-family: var(--font-family);
+            touch-action: manipulation;
+        }
+
+        .screen-header .action-btn:active {
+            transform: scale(0.9);
+        }
+
+        .header-actions {
+            display: flex;
+            gap: 6px;
+        }
+
+        .header-actions .action-btn {
+            width: clamp(32px, 8vw, 42px);
+            height: clamp(32px, 8vw, 42px);
+            font-size: clamp(14px, 3.5vw, 18px);
+        }
+
+        /* ===== ВКЛАДКИ ===== */
+        .tab-bar {
+            display: flex;
+            background: var(--bg-card);
+            border-top: 3px solid var(--border-color);
+            padding: 6px 8px 10px;
+            justify-content: space-around;
+            flex-shrink: 0;
+            transition: background 0.3s, border-color 0.3s;
+            position: relative;
+            padding-bottom: calc(10px + var(--safe-bottom));
+            will-change: background, border-color;
+            transform: translateZ(0);
+        }
+
+        .tab-bar::before {
+            content: '';
+            position: absolute;
+            top: -3px;
+            left: 0;
+            width: 100%;
+            height: 3px;
+            background: linear-gradient(90deg, var(--accent), #ff00ff, var(--accent));
+            background-size: 200% 100%;
+            animation: rainbowLine 2s linear infinite;
+            will-change: background-position;
+        }
+
+        @keyframes rainbowLine {
+            0% { background-position: 0% 0%; }
+            100% { background-position: 200% 0%; }
+        }
+
+        .tab-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            background: none;
+            border: 2px solid transparent;
+            font-family: var(--font-family);
+            cursor: pointer;
+            padding: 4px 6px;
+            border-radius: 0;
+            transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+            color: var(--text-muted);
+            font-size: clamp(8px, 2vw, 12px);
+            font-weight: 500;
+            gap: 2px;
+            min-width: 40px;
+            touch-action: manipulation;
+        }
+
+        .tab-item .tab-icon {
+            font-size: clamp(18px, 4.5vw, 26px);
+            line-height: 1.2;
+            transition: transform 0.2s;
+        }
+
+        .tab-item .tab-label {
+            font-size: clamp(7px, 1.8vw, 10px);
+            letter-spacing: 0.3px;
+            color: inherit;
+            font-family: var(--font-family);
+        }
+
+        .tab-item.active {
+            color: var(--accent);
+            border-color: var(--accent);
+            transform: scale(1.02);
+        }
+
+        .tab-item.active .tab-icon {
+            transform: scale(1.1);
+        }
+
+        /* ===== ЗАМЕТКИ ===== */
+        .timeline-item {
+            display: flex;
+            align-items: center;
+            padding: 10px 6px;
+            border-bottom: 2px solid var(--border-light);
+            cursor: default;
+            transition: background 0.2s, border-color 0.2s, transform 0.2s;
+            will-change: transform, background, border-color;
+            transform: translateZ(0);
+            animation: noteSlide 0.3s cubic-bezier(0.16, 1, 0.3, 1) both;
+            min-height: 44px;
+        }
+
+        .timeline-item:nth-child(1) { animation-delay: 0.03s; }
+        .timeline-item:nth-child(2) { animation-delay: 0.06s; }
+        .timeline-item:nth-child(3) { animation-delay: 0.09s; }
+        .timeline-item:nth-child(4) { animation-delay: 0.12s; }
+        .timeline-item:nth-child(5) { animation-delay: 0.15s; }
+
+        @keyframes noteSlide {
+            from { opacity: 0; transform: translateX(-15px) scale(0.96); }
+            to { opacity: 1; transform: translateX(0) scale(1); }
+        }
+
+        .timeline-item:hover {
+            background: var(--bg-timeline-hover);
+            border-color: var(--accent);
+            transform: translateX(4px) scale(1.01);
+        }
+
+        .timeline-item:last-child {
+            border-bottom: none;
+        }
+
+        .timeline-date {
+            font-size: clamp(9px, 2.2vw, 13px);
+            font-weight: 600;
+            color: var(--text-secondary);
+            min-width: 42px;
+            letter-spacing: 0.3px;
+            font-family: var(--font-family);
+        }
+
+        .timeline-divider {
+            width: 2px;
+            height: 24px;
+            background: var(--border-light);
+            margin: 0 10px 0 8px;
+            flex-shrink: 0;
+            transition: background 0.2s, height 0.2s;
+        }
+
+        .timeline-item:hover .timeline-divider {
+            background: var(--accent);
+            height: 28px;
+        }
+
+        .timeline-content {
+            flex: 1;
+            font-size: clamp(10px, 2.5vw, 14px);
+            font-weight: 500;
+            color: var(--text-primary);
+            letter-spacing: 0.2px;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            flex-wrap: wrap;
+            font-family: var(--font-family);
+            transition: color 0.2s;
+        }
+
+        .timeline-item:hover .timeline-content {
+            color: var(--accent);
+        }
+
+        .tag {
+            font-size: clamp(6px, 1.5vw, 9px);
+            font-weight: 600;
+            background: var(--tag-bg);
+            color: var(--tag-color);
+            padding: 1px 6px;
+            border: 1px solid currentColor;
+            font-family: var(--font-family);
+            text-transform: uppercase;
+        }
+        .tag.orange { background: var(--tag-orange-bg); color: var(--tag-orange-color); }
+        .tag.green { background: var(--tag-green-bg); color: var(--tag-green-color); }
+        .tag.pink { background: var(--tag-pink-bg); color: var(--tag-pink-color); }
+
+        .timeline-arrow {
+            color: var(--text-muted);
+            font-size: clamp(12px, 3vw, 18px);
+            margin-left: auto;
+            flex-shrink: 0;
+            transition: transform 0.2s, color 0.2s;
+        }
+
+        .timeline-item:hover .timeline-arrow {
+            color: var(--accent);
+            transform: translateX(4px);
+        }
+
+        .delete-btn {
+            background: none;
+            border: 2px solid var(--text-muted);
+            color: var(--text-muted);
+            font-size: clamp(10px, 2.5vw, 14px);
+            width: clamp(24px, 6vw, 34px);
+            height: clamp(24px, 6vw, 34px);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+            font-family: var(--font-family);
+            margin-left: 6px;
+            flex-shrink: 0;
+            background: var(--bg-card);
+            touch-action: manipulation;
+        }
+
+        .delete-btn:active {
+            transform: scale(0.85);
+        }
+
+        .delete-btn:hover {
+            border-color: #ff4444;
+            color: #ff4444;
+            transform: scale(1.1) rotate(90deg);
+            background: var(--bg-hover);
+        }
+
+        .delete-btn.deleting {
+            animation: deleteFlash 0.25s ease forwards;
+        }
+
+        @keyframes deleteFlash {
+            0% { transform: scale(1); opacity: 1; }
+            50% { transform: scale(1.4) rotate(180deg); opacity: 0.5; background: #ff4444; color: #fff; border-color: #ff4444; }
+            100% { transform: scale(0); opacity: 0; }
+        }
+
+        .empty-notes {
+            text-align: center;
+            padding: 30px 16px;
+            color: var(--text-muted);
+            font-family: var(--font-family);
+            font-size: clamp(10px, 2.5vw, 14px);
+            line-height: 1.8;
+            animation: emptyPulse 2s infinite alternate;
+            will-change: opacity;
+        }
+
+        @keyframes emptyPulse {
+            from { opacity: 0.6; }
+            to { opacity: 1; }
+        }
+
+        .empty-notes .emoji {
+            font-size: clamp(36px, 9vw, 52px);
+            display: block;
+            margin-bottom: 12px;
+        }
+
+        /* ===== КАЛЕНДАРЬ ===== */
+        .calendar-section {
+            background: var(--bg-card);
+            padding: 14px 12px 16px;
+            border: 3px solid var(--calendar-border);
+            transition: border-color 0.3s, box-shadow 0.3s;
+            animation: calendarGlow 3s infinite alternate;
+            will-change: border-color, box-shadow;
+        }
+
+        @keyframes calendarGlow {
+            from { border-color: var(--calendar-border); }
+            to { border-color: var(--accent); box-shadow: 0 0 20px var(--accent-shadow); }
+        }
+
+        .calendar-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 12px;
+        }
+
+        .calendar-header h3 {
+            font-size: clamp(12px, 3vw, 16px);
+            font-weight: 600;
+            color: var(--text-primary);
+            font-family: var(--font-family);
+            animation: flicker 3s infinite;
+        }
+
+        @keyframes flicker {
+            0%, 100% { text-shadow: 0 0 0 transparent; }
+            50% { text-shadow: 0 0 10px var(--accent-shadow); }
+        }
+
+        .calendar-nav button {
+            background: var(--bg-card);
+            border: 3px solid var(--border-color);
+            width: clamp(28px, 7vw, 38px);
+            height: clamp(28px, 7vw, 38px);
+            border-radius: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--text-secondary);
+            font-size: clamp(12px, 3vw, 18px);
+            cursor: pointer;
+            transition: background 0.2s, border-color 0.2s, transform 0.2s;
+            font-family: var(--font-family);
+            touch-action: manipulation;
+        }
+
+        .calendar-nav button:active {
+            transform: scale(0.9);
+        }
+
+        .calendar-grid {
+            display: grid;
+            grid-template-columns: repeat(7, 1fr);
+            gap: 2px;
+            text-align: center;
+        }
+
+        .calendar-grid .day-label {
+            font-size: clamp(7px, 1.8vw, 10px);
+            font-weight: 600;
+            color: var(--text-muted);
+            padding: 4px 0 6px;
+            text-transform: uppercase;
+            letter-spacing: 0.3px;
+            font-family: var(--font-family);
+            animation: labelPulse 2s infinite;
+        }
+
+        @keyframes labelPulse {
+            0%, 100% { opacity: 0.7; }
+            50% { opacity: 1; color: var(--accent); }
+        }
+
+        .calendar-grid .day {
+            font-size: clamp(10px, 2.5vw, 14px);
+            font-weight: 500;
+            color: var(--text-primary);
+            padding: 5px 0;
+            border: 1px solid transparent;
+            transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+            background: transparent;
+            font-family: var(--font-family);
+            touch-action: manipulation;
+        }
+
+        .calendar-grid .day.other-month {
+            color: var(--day-other);
+        }
+
+        .calendar-grid .day.today {
+            background: var(--accent);
+            color: #fff;
+            font-weight: 700;
+            border-color: var(--accent);
+            transform: scale(1.05);
+            animation: todayPop 1.5s infinite alternate;
+        }
+
+        @keyframes todayPop {
+            from { transform: scale(1.05); box-shadow: 0 0 10px var(--accent-shadow); }
+            to { transform: scale(1.1); box-shadow: 0 0 25px var(--accent-shadow); }
+        }
+
+        /* ===== ПОИСК GOOGLE (исправленный: без автофокуса) ===== */
+        .search-google {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding-top: 16px;
+        }
+
+        .search-google .logo {
+            font-size: clamp(24px, 6vw, 36px);
+            font-weight: 800;
+            letter-spacing: 1px;
+            color: var(--text-primary);
+            margin-bottom: 16px;
+            font-family: var(--font-family);
+            animation: logoGlow 3s infinite alternate;
+        }
+
+        @keyframes logoGlow {
+            from { text-shadow: 0 0 10px var(--accent-shadow); }
+            to { text-shadow: 0 0 30px var(--accent-shadow); }
+        }
+
+        .search-box-google {
+            display: flex;
+            align-items: center;
+            background: var(--bg-app);
+            border: 3px solid var(--google-border);
+            padding: 4px 12px;
+            width: 100%;
+            max-width: 380px;
+            transition: border-color 0.3s, box-shadow 0.3s, transform 0.2s;
+            box-shadow: var(--shadow-search);
+            touch-action: manipulation;
+        }
+
+        .search-box-google:focus-within {
+            border-color: var(--accent);
+            box-shadow: var(--shadow-search-focus);
+            transform: scale(1.01);
+        }
+
+        .search-box-google .icon-search {
+            color: var(--google-icon);
+            font-size: clamp(18px, 4.5vw, 24px);
+            margin-right: 10px;
+            cursor: pointer;
+            flex-shrink: 0;
+            transition: transform 0.2s, color 0.2s;
+            touch-action: manipulation;
+            padding: 4px;
+        }
+
+        .search-box-google .icon-search:active {
+            transform: scale(0.85);
+        }
+
+        .search-box-google input {
+            flex: 1;
+            border: none;
+            outline: none;
+            font-size: clamp(12px, 3vw, 16px);
+            padding: 8px 0;
+            background: transparent;
+            color: var(--text-primary);
+            font-family: var(--font-family);
+            transition: letter-spacing 0.2s;
+            min-height: 36px;
+        }
+
+        .search-box-google input::placeholder {
+            color: var(--google-placeholder);
+            font-size: clamp(9px, 2.2vw, 13px);
+        }
+
+        .search-box-google .clear-btn {
+            background: none;
+            border: none;
+            color: var(--clear-btn-color);
+            font-size: clamp(12px, 3vw, 16px);
+            cursor: pointer;
+            padding: 4px;
+            display: none;
+            font-family: var(--font-family);
+            transition: transform 0.2s, color 0.2s;
+            touch-action: manipulation;
+        }
+        .search-box-google .clear-btn.visible { display: block; }
+        .search-box-google .clear-btn:active { transform: scale(0.85); }
+
+        .quick-links {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+            justify-content: center;
+            margin: 18px 0 20px;
+        }
+
+        .quick-link {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            background: var(--quick-link-bg);
+            padding: 10px 12px;
+            min-width: 52px;
+            cursor: pointer;
+            transition: background 0.2s, border-color 0.2s, transform 0.2s;
+            border: 2px solid var(--border-color);
+            text-decoration: none;
+            color: var(--text-primary);
+            touch-action: manipulation;
+        }
+
+        .quick-link:active {
+            transform: scale(0.93);
+        }
+
+        .quick-link .ql-icon { font-size: clamp(20px, 5vw, 28px); margin-bottom: 2px; }
+        .quick-link .ql-label {
+            font-size: clamp(7px, 1.8vw, 10px);
+            font-weight: 500;
+            color: var(--text-secondary);
+            font-family: var(--font-family);
+        }
+
+        .recent-section {
+            width: 100%;
+            max-width: 380px;
+            margin-top: 6px;
+        }
+
+        .recent-section .recent-title {
+            font-size: clamp(9px, 2.2vw, 13px);
+            font-weight: 600;
+            color: var(--text-secondary);
+            margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            font-family: var(--font-family);
+            letter-spacing: 0.5px;
+        }
+
+        .recent-item {
+            display: flex;
+            align-items: center;
+            padding: 8px 10px;
+            border-radius: 0;
+            cursor: pointer;
+            transition: background 0.2s, transform 0.2s;
+            gap: 8px;
+            border-bottom: 2px solid var(--recent-border);
+            touch-action: manipulation;
+            min-height: 40px;
+        }
+
+        .recent-item:active {
+            transform: scale(0.96);
+        }
+
+        .recent-item .check-icon { color: #34A853; font-size: clamp(14px, 3.5vw, 20px); }
+        .recent-item .query-text {
+            font-size: clamp(10px, 2.5vw, 14px);
+            font-weight: 400;
+            color: var(--text-primary);
+            flex: 1;
+            font-family: var(--font-family);
+        }
+
+        /* ===== КЛИКЕР ===== */
+        .clicker-game {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 16px;
+            padding: 8px 0;
+        }
+
+        .clicker-stats {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 4px;
+        }
+
+        .clicker-score {
+            font-size: clamp(28px, 7vw, 40px);
+            font-weight: 700;
+            color: var(--accent);
+            text-shadow: 0 0 15px var(--accent-shadow);
+            font-family: var(--font-family);
+            transition: transform 0.1s;
+        }
+
+        .clicker-per-click {
+            font-size: clamp(10px, 2.5vw, 14px);
+            color: var(--text-secondary);
+            font-family: var(--font-family);
+        }
+
+        .clicker-btn {
+            width: clamp(120px, 30vw, 180px);
+            height: clamp(120px, 30vw, 180px);
+            border-radius: 0;
+            border: 4px solid var(--accent);
+            background: var(--bg-card);
+            color: var(--accent);
+            font-size: clamp(32px, 8vw, 52px);
+            font-family: var(--font-family);
+            cursor: pointer;
+            transition: transform 0.1s, box-shadow 0.2s;
+            box-shadow: 0 0 20px var(--accent-shadow);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            user-select: none;
+            -webkit-tap-highlight-color: transparent;
+            touch-action: manipulation;
+        }
+
+        .clicker-btn:active {
+            transform: scale(0.9);
+        }
+
+        .clicker-upgrades {
+            width: 100%;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            margin-top: 6px;
+        }
+
+        .upgrade-item {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            background: var(--bg-card);
+            border: 2px solid var(--border-color);
+            padding: 8px 12px;
+            transition: border-color 0.2s, background 0.2s, transform 0.2s;
+            cursor: pointer;
+            touch-action: manipulation;
+            min-height: 44px;
+        }
+
+        .upgrade-item:active {
+            transform: scale(0.97);
+        }
+
+        .upgrade-item .upgrade-info {
+            display: flex;
+            flex-direction: column;
+            gap: 2px;
+        }
+
+        .upgrade-item .upgrade-name {
+            font-size: clamp(9px, 2.2vw, 13px);
+            font-weight: 600;
+            color: var(--text-primary);
+            font-family: var(--font-family);
+        }
+
+        .upgrade-item .upgrade-desc {
+            font-size: clamp(7px, 1.8vw, 10px);
+            color: var(--text-muted);
+            font-family: var(--font-family);
+        }
+
+        .upgrade-item .upgrade-price {
+            font-size: clamp(9px, 2.2vw, 13px);
+            font-weight: 700;
+            color: var(--accent);
+            font-family: var(--font-family);
+            padding: 2px 10px;
+            border: 2px solid var(--accent);
+            white-space: nowrap;
+        }
+
+        .upgrade-item.locked .upgrade-price {
+            opacity: 0.4;
+            border-color: var(--text-muted);
+            color: var(--text-muted);
+        }
+
+        .upgrade-item.locked {
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
+
+        /* ===== НАСТРОЙКИ ===== */
+        .settings-item {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 12px 6px;
+            border-bottom: 3px solid var(--settings-border);
+            transition: background 0.2s, border-color 0.2s, transform 0.2s;
+            min-height: 44px;
+        }
+
+        .settings-item.clickable {
+            cursor: pointer;
+            touch-action: manipulation;
+        }
+        .settings-item.clickable:active {
+            transform: scale(0.97);
+        }
+
+        .settings-item .label {
+            font-weight: 500;
+            font-size: clamp(10px, 2.5vw, 14px);
+            color: var(--text-primary);
+            font-family: var(--font-family);
+        }
+
+        .settings-item .value {
+            color: var(--text-muted);
+            font-size: clamp(9px, 2.2vw, 13px);
+            font-family: var(--font-family);
+        }
+
+        .settings-item .toggle {
+            width: clamp(36px, 9vw, 48px);
+            height: clamp(20px, 5vw, 28px);
+            background: var(--toggle-bg);
+            border-radius: 0;
+            position: relative;
+            cursor: pointer;
+            transition: background 0.3s;
+            flex-shrink: 0;
+            border: 2px solid var(--text-muted);
+            touch-action: manipulation;
+        }
+
+        .settings-item .toggle.active {
+            background: var(--toggle-active);
+            border-color: var(--toggle-active);
+        }
+
+        .settings-item .toggle::after {
+            content: '';
+            width: clamp(12px, 3vw, 18px);
+            height: clamp(12px, 3vw, 18px);
+            background: #fff;
+            border-radius: 0;
+            position: absolute;
+            top: 2px;
+            left: 2px;
+            transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1), background 0.3s;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+        }
+
+        .settings-item .toggle.active::after {
+            transform: translateX(clamp(18px, 4.5vw, 24px));
+            background: #000;
+        }
+
+        /* ===== МОДАЛЬНОЕ ОКНО ===== */
+        .modal-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: var(--modal-overlay);
+            z-index: 1000;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+            animation: overlayFade 0.2s ease;
+            will-change: opacity;
+        }
+
+        .modal-overlay.active {
+            display: flex;
+        }
+
+        @keyframes overlayFade {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        .modal {
+            background: var(--bg-app);
+            padding: 24px 20px 18px;
+            max-width: 340px;
+            width: 100%;
+            box-shadow: var(--shadow-modal);
+            border: 4px solid var(--border-color);
+            animation: modalPop 0.25s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+            will-change: transform, opacity;
+        }
+
+        @keyframes modalPop {
+            from { opacity: 0; transform: scale(0.94); }
+            to { opacity: 1; transform: scale(1); }
+        }
+
+        .modal h3 {
+            font-size: clamp(12px, 3vw, 16px);
+            font-weight: 700;
+            color: var(--text-primary);
+            margin-bottom: 14px;
+            font-family: var(--font-family);
+        }
+
+        .modal textarea {
+            width: 100%;
+            padding: 10px 12px;
+            border: 3px solid var(--border-color);
+            font-family: var(--font-family);
+            font-size: clamp(10px, 2.5vw, 14px);
+            resize: vertical;
+            min-height: 70px;
+            background: var(--bg-input);
+            color: var(--text-primary);
+            outline: none;
+            transition: border-color 0.2s, transform 0.2s;
+        }
+
+        .modal textarea:focus {
+            border-color: var(--accent);
+            transform: scale(1.01);
+        }
+
+        .modal-actions {
+            display: flex;
+            gap: 8px;
+            justify-content: flex-end;
+            margin-top: 14px;
+        }
+
+        .modal-actions button {
+            padding: 8px 18px;
+            border: 3px solid var(--border-color);
+            background: var(--bg-card);
+            font-weight: 700;
+            font-size: clamp(10px, 2.5vw, 14px);
+            cursor: pointer;
+            transition: background 0.2s, border-color 0.2s, transform 0.2s;
+            font-family: var(--font-family);
+            color: var(--text-primary);
+            touch-action: manipulation;
+        }
+
+        .modal-actions button:active {
+            transform: scale(0.93);
+        }
+
+        .modal-actions .btn-save {
+            background: var(--accent);
+            color: #fff;
+            border-color: var(--accent);
+        }
+
+        /* ===== ОБЩАЯ АДАПТИВНОСТЬ ===== */
+        @media (max-width: 400px) {
+            .app-wrapper {
+                border-radius: 8px;
+                border-width: 3px;
+                max-height: 100vh;
+            }
+            .content-area {
+                padding: 12px 10px 6px;
+            }
+            .tab-item {
+                min-width: 34px;
+                padding: 2px 4px;
+            }
+            .timeline-item {
+                padding: 8px 4px;
+                min-height: 38px;
+            }
+            .settings-item {
+                padding: 10px 4px;
+                min-height: 38px;
+            }
+            .upgrade-item {
+                padding: 6px 8px;
+                min-height: 38px;
+            }
+        }
+
+        @media (min-height: 800px) {
+            .app-wrapper {
+                max-height: 90vh;
+            }
+        }
+
+        /* ===== REDUCED MOTION ===== */
+        @media (prefers-reduced-motion: reduce) {
+            * {
+                animation-duration: 0.01ms !important;
+                animation-iteration-count: 1 !important;
+                transition-duration: 0.01ms !important;
+            }
+            .tab-bar::before {
+                animation: none;
+            }
+        }
+
+        @media (max-width: 360px) {
+            .app-wrapper {
+                animation: none;
+            }
+            .screen-header {
+                animation: none;
+            }
+            .screen-header h2 {
+                animation: none;
+            }
+            .screen-header .action-btn {
+                animation: none;
+            }
+            .calendar-section {
+                animation: none;
+            }
+            .clicker-btn {
+                animation: none;
+            }
+            .modal-actions .btn-save {
+                animation: none;
+            }
+            .search-google .logo {
+                animation: none;
+            }
+            .quick-link {
+                animation: none;
+            }
+            .recent-item {
+                animation: none;
+            }
+            .timeline-item {
+                animation: none;
+            }
+            .empty-notes {
+                animation: none;
+            }
+        }
+    </style>
+</head>
+<body>
+
+<div class="app-wrapper" id="appWrapper">
+
+    <!-- CONTENT -->
+    <div class="content-area">
+
+        <!-- Заметки -->
+        <div id="screen-notes" class="screen active">
+            <div class="screen-header">
+                <h2 data-i18n="notes_title">📋 ЗАМЕТКИ</h2>
+                <div class="header-actions">
+                    <button class="action-btn" id="clearAllNotesBtn" title="Очистить все">🗑️</button>
+                    <button class="action-btn" id="notesAddBtn">➕</button>
+                </div>
+            </div>
+            <div class="timeline" id="timeline"></div>
+        </div>
+
+        <!-- Календарь -->
+        <div id="screen-calendar" class="screen">
+            <div class="screen-header">
+                <h2 data-i18n="calendar_title">📅 КАЛЕНДАРЬ</h2>
+                <button class="action-btn" id="calendarTodayBtn">📌</button>
+            </div>
+            <div class="calendar-section">
+                <div class="calendar-header">
+                    <h3 id="monthYearDisplay">АВГУСТ 2026</h3>
+                    <div class="calendar-nav">
+                        <button id="prevMonthBtn">‹</button>
+                        <button id="nextMonthBtn">›</button>
+                    </div>
+                </div>
+                <div class="calendar-grid" id="calendarGrid"></div>
+            </div>
+        </div>
+
+        <!-- Поиск Google (исправленный: без автофокуса) -->
+        <div id="screen-search" class="screen">
+            <div class="search-google">
+                <div class="logo">
+                    <span>G</span><span>o</span><span>o</span><span>g</span><span>l</span><span>e</span>
+                </div>
+                <div class="search-box-google" id="searchBoxGoogle">
+                    <span class="icon-search" id="googleSearchIcon">🔍</span>
+                    <input type="text" id="googleSearchInput" placeholder="ИСКАТЬ ИЛИ ВВЕСТИ URL" data-i18n-placeholder="search_placeholder" autocomplete="off">
+                    <button class="clear-btn" id="googleClearBtn">✕</button>
+                </div>
+                <div class="quick-links">
+                    <a href="https://www.youtube.com" target="_blank" class="quick-link">
+                        <span class="ql-icon">▶️</span>
+                        <span class="ql-label" data-i18n="youtube">YouTube</span>
+                    </a>
+                    <a href="https://mail.google.com" target="_blank" class="quick-link">
+                        <span class="ql-icon">📧</span>
+                        <span class="ql-label" data-i18n="gmail">Gmail</span>
+                    </a>
+                    <a href="https://ru.wikipedia.org" target="_blank" class="quick-link">
+                        <span class="ql-icon">🌐</span>
+                        <span class="ql-label" data-i18n="wikipedia">Википедия</span>
+                    </a>
+                    <a href="https://translate.google.com" target="_blank" class="quick-link">
+                        <span class="ql-icon">🌍</span>
+                        <span class="ql-label" data-i18n="translate">Перевод</span>
+                    </a>
+                </div>
+                <div class="recent-section">
+                    <div class="recent-title">
+                        <span>🕒</span> <span data-i18n="recent_queries">НЕДАВНИЕ ЗАПРОСЫ</span>
+                    </div>
+                    <div class="recent-item" data-query="разработка дизайн систем figma">
+                        <span class="check-icon">☑</span>
+                        <span class="query-text">разработка дизайн систем figma</span>
+                    </div>
+                    <div class="recent-item" data-query="React stateless components">
+                        <span class="check-icon">☑</span>
+                        <span class="query-text">React stateless components</span>
+                    </div>
+                    <div class="recent-item" data-query="календарь август 2026">
+                        <span class="check-icon">☑</span>
+                        <span class="query-text">календарь август 2026</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Игра Кликер -->
+        <div id="screen-game" class="screen">
+            <div class="screen-header">
+                <h2 data-i18n="game_title">🎮 КЛИКЕР</h2>
+                <button class="action-btn" id="resetGameBtn">🔄</button>
+            </div>
+            <div class="clicker-game">
+                <div class="clicker-stats">
+                    <div class="clicker-score" id="clickerScore">0</div>
+                    <div class="clicker-per-click">
+                        ⚡ +<span id="clickerPerClick">1</span> <span data-i18n="per_click">ЗА КЛИК</span>
+                    </div>
+                    <div class="clicker-per-click" style="font-size:clamp(9px, 2.2vw, 13px); color:var(--text-muted);">
+                        🤖 <span id="clickerAuto">0</span> <span data-i18n="per_second">В СЕКУНДУ</span>
+                    </div>
+                </div>
+
+                <button class="clicker-btn" id="clickerMainBtn">👆</button>
+
+                <div class="clicker-upgrades">
+                    <div class="upgrade-item" id="upgradeClick" data-type="click">
+                        <div class="upgrade-info">
+                            <span class="upgrade-name" data-i18n="upgrade_click_name">💪 УСИЛЕНИЕ КЛИКА</span>
+                            <span class="upgrade-desc" data-i18n="upgrade_click_desc">+1 за клик</span>
+                        </div>
+                        <span class="upgrade-price" id="priceClick">10</span>
+                    </div>
+                    <div class="upgrade-item" id="upgradeAuto" data-type="auto">
+                        <div class="upgrade-info">
+                            <span class="upgrade-name" data-i18n="upgrade_auto_name">🤖 АВТОКЛИКЕР</span>
+                            <span class="upgrade-desc" data-i18n="upgrade_auto_desc">+1 в секунду</span>
+                        </div>
+                        <span class="upgrade-price" id="priceAuto">50</span>
+                    </div>
+                    <div class="upgrade-item" id="upgradeMulti" data-type="multi">
+                        <div class="upgrade-info">
+                            <span class="upgrade-name" data-i18n="upgrade_multi_name">🌟 МНОЖИТЕЛЬ</span>
+                            <span class="upgrade-desc" data-i18n="upgrade_multi_desc">x2 к силе клика</span>
+                        </div>
+                        <span class="upgrade-price" id="priceMulti">200</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Настройки -->
+        <div id="screen-settings" class="screen">
+            <div class="screen-header">
+                <h2 data-i18n="settings_title">⚙️ НАСТРОЙКИ</h2>
+                <button class="action-btn">💾</button>
+            </div>
+            <div class="settings-item clickable" id="themeToggleRow">
+                <span class="label" data-i18n="dark_mode">ТЁМНАЯ ТЕМА</span>
+                <div class="toggle" id="darkModeToggle"></div>
+            </div>
+            <div class="settings-item clickable" id="notifToggleRow">
+                <span class="label" data-i18n="notifications">УВЕДОМЛЕНИЯ</span>
+                <div class="toggle active" id="notifToggle"></div>
+            </div>
+            <div class="settings-item clickable" id="languageSwitch">
+                <span class="label" data-i18n="language">ЯЗЫК</span>
+                <span class="value" id="languageValue">РУССКИЙ</span>
+            </div>
+            <div class="settings-item">
+                <span class="label" data-i18n="version">ВЕРСИЯ</span>
+                <span class="value">1.0.0</span>
+            </div>
+            <div class="settings-item clickable" id="supportAuthor" style="border-bottom: none;">
+                <span class="label" data-i18n="support_author">❤️ ПОДДЕРЖАТЬ АВТОРА</span>
+                <span class="value">→</span>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- TAB BAR -->
+    <div class="tab-bar" id="tabBar">
+        <button class="tab-item active" data-tab="notes">
+            <span class="tab-icon">📋</span>
+            <span class="tab-label" data-i18n="tab_notes">ЗАМЕТКИ</span>
+        </button>
+        <button class="tab-item" data-tab="calendar">
+            <span class="tab-icon">📅</span>
+            <span class="tab-label" data-i18n="tab_calendar">КАЛЕНДАРЬ</span>
+        </button>
+        <button class="tab-item" data-tab="search">
+            <span class="tab-icon">🔍</span>
+            <span class="tab-label" data-i18n="tab_search">ПОИСК</span>
+        </button>
+        <button class="tab-item" data-tab="game">
+            <span class="tab-icon">🎮</span>
+            <span class="tab-label" data-i18n="tab_game">ИГРА</span>
+        </button>
+        <button class="tab-item" data-tab="settings">
+            <span class="tab-icon">⚙️</span>
+            <span class="tab-label" data-i18n="tab_settings">НАСТРОЙКИ</span>
+        </button>
+    </div>
+
+</div>
+
+<!-- МОДАЛЬНОЕ ОКНО -->
+<div class="modal-overlay" id="noteModal">
+    <div class="modal">
+        <h3 id="modalTitle">📝 НОВАЯ ЗАМЕТКА</h3>
+        <textarea id="noteInput" placeholder="ВВЕДИТЕ ТЕКСТ..."></textarea>
+        <div class="modal-actions">
+            <button class="btn-cancel" id="modalCancel">ОТМЕНА</button>
+            <button class="btn-save" id="modalSave">СОХРАНИТЬ</button>
+        </div>
+    </div>
+</div>
+
+<script>
+    (function() {
+        'use strict';
+
+        // ===== TRANSLATIONS =====
+        const translations = {
+            ru: {
+                notes_title: '📋 ЗАМЕТКИ',
+                calendar_title: '📅 КАЛЕНДАРЬ',
+                search_placeholder: 'ИСКАТЬ ИЛИ ВВЕСТИ URL',
+                youtube: 'YouTube',
+                gmail: 'Gmail',
+                wikipedia: 'Википедия',
+                translate: 'Перевод',
+                recent_queries: 'НЕДАВНИЕ ЗАПРОСЫ',
+                game_title: '🎮 КЛИКЕР',
+                settings_title: '⚙️ НАСТРОЙКИ',
+                dark_mode: 'ТЁМНАЯ ТЕМА',
+                notifications: 'УВЕДОМЛЕНИЯ',
+                language: 'ЯЗЫК',
+                version: 'ВЕРСИЯ',
+                support_author: '❤️ ПОДДЕРЖАТЬ АВТОРА',
+                tab_notes: 'ЗАМЕТКИ',
+                tab_calendar: 'КАЛЕНДАРЬ',
+                tab_search: 'ПОИСК',
+                tab_game: 'ИГРА',
+                tab_settings: 'НАСТРОЙКИ',
+                per_click: 'ЗА КЛИК',
+                per_second: 'В СЕКУНДУ',
+                upgrade_click_name: '💪 УСИЛЕНИЕ КЛИКА',
+                upgrade_click_desc: '+1 за клик',
+                upgrade_auto_name: '🤖 АВТОКЛИКЕР',
+                upgrade_auto_desc: '+1 в секунду',
+                upgrade_multi_name: '🌟 МНОЖИТЕЛЬ',
+                upgrade_multi_desc: 'x2 к силе клика',
+                note_added: '✅ ЗАМЕТКА ДОБАВЛЕНА!',
+                note_deleted: '🗑️ ЗАМЕТКА УДАЛЕНА!',
+                all_deleted: '🗑️ ВСЕ ЗАМЕТКИ УДАЛЕНЫ!',
+                confirm_delete: 'УДАЛИТЬ ЗАМЕТКУ?',
+                confirm_delete_all: 'УДАЛИТЬ ВСЕ ЗАМЕТКИ?',
+                confirm_reset: 'СБРОСИТЬ ВЕСЬ ПРОГРЕСС?',
+                demo_click: '📌 {title}\n(ДЕМО-КЛИК)',
+                months: ['ЯНВ','ФЕВ','МАР','АПР','МАЙ','ИЮН','ИЮЛ','АВГ','СЕН','ОКТ','НОЯ','ДЕК'],
+                days_short: ['ПН','ВТ','СР','ЧТ','ПТ','СБ','ВС'],
+                modal_title: '📝 НОВАЯ ЗАМЕТКА',
+                modal_placeholder: 'ВВЕДИТЕ ТЕКСТ...',
+                modal_cancel: 'ОТМЕНА',
+                modal_save: 'СОХРАНИТЬ',
+                empty_notes: 'У ВАС ПОКА НЕТ ЗАМЕТОК\nНАЖМИТЕ +, ЧТОБЫ ДОБАВИТЬ',
+            },
+            en: {
+                notes_title: '📋 NOTES',
+                calendar_title: '📅 CALENDAR',
+                search_placeholder: 'SEARCH OR ENTER URL',
+                youtube: 'YouTube',
+                gmail: 'Gmail',
+                wikipedia: 'Wikipedia',
+                translate: 'Translate',
+                recent_queries: 'RECENT SEARCHES',
+                game_title: '🎮 CLICKER',
+                settings_title: '⚙️ SETTINGS',
+                dark_mode: 'DARK MODE',
+                notifications: 'NOTIFICATIONS',
+                language: 'LANGUAGE',
+                version: 'VERSION',
+                support_author: '❤️ SUPPORT THE AUTHOR',
+                tab_notes: 'NOTES',
+                tab_calendar: 'CALENDAR',
+                tab_search: 'SEARCH',
+                tab_game: 'GAME',
+                tab_settings: 'SETTINGS',
+                per_click: 'PER CLICK',
+                per_second: 'PER SECOND',
+                upgrade_click_name: '💪 CLICK BOOST',
+                upgrade_click_desc: '+1 per click',
+                upgrade_auto_name: '🤖 AUTOCLICKER',
+                upgrade_auto_desc: '+1 per second',
+                upgrade_multi_name: '🌟 MULTIPLIER',
+                upgrade_multi_desc: 'x2 click power',
+                note_added: '✅ NOTE ADDED!',
+                note_deleted: '🗑️ NOTE DELETED!',
+                all_deleted: '🗑️ ALL NOTES DELETED!',
+                confirm_delete: 'DELETE NOTE?',
+                confirm_delete_all: 'DELETE ALL NOTES?',
+                confirm_reset: 'RESET ALL PROGRESS?',
+                demo_click: '📌 {title}\n(DEMO CLICK)',
+                months: ['JAN','FEB','MAR','APR','MAY','JUN','JUL','AUG','SEP','OCT','NOV','DEC'],
+                days_short: ['MO','TU','WE','TH','FR','SA','SU'],
+                modal_title: '📝 NEW NOTE',
+                modal_placeholder: 'ENTER TEXT...',
+                modal_cancel: 'CANCEL',
+                modal_save: 'SAVE',
+                empty_notes: 'YOU HAVE NO NOTES YET\nPRESS + TO ADD ONE',
+            }
+        };
+
+        let currentLanguage = 'ru';
+        let currentTheme = 'dark';
+
+        // ===== ДАННЫЕ ЗАМЕТОК =====
+        let notesData = [];
+
+        function loadNotes() {
+            const saved = localStorage.getItem('myNotes');
+            if (saved) {
+                try {
+                    const parsed = JSON.parse(saved);
+                    if (Array.isArray(parsed)) {
+                        notesData = parsed;
+                        return;
+                    }
+                } catch (e) {}
+            }
+            notesData = [];
+        }
+
+        function saveNotes() {
+            try {
+                localStorage.setItem('myNotes', JSON.stringify(notesData));
+            } catch (e) {}
+        }
+
+        // ===== КЛИКЕР =====
+        let clickerState = {
+            score: 0,
+            perClick: 1,
+            autoPerSecond: 0,
+            clickUpgradeLevel: 0,
+            autoUpgradeLevel: 0,
+            multiUpgradeLevel: 0,
+        };
+
+        const upgradePrices = {
+            click: [10, 25, 50, 100, 200, 500, 1000, 2500, 5000, 10000],
+            auto: [50, 120, 300, 800, 2000, 5000, 12000, 30000, 75000, 200000],
+            multi: [200, 500, 1200, 3000, 8000, 20000, 50000, 120000, 300000, 800000],
+        };
+
+        function loadGame() {
+            const saved = localStorage.getItem('clickerState');
+            if (saved) {
+                try {
+                    const parsed = JSON.parse(saved);
+                    clickerState = {
+                        score: typeof parsed.score === 'number' ? parsed.score : 0,
+                        perClick: typeof parsed.perClick === 'number' ? parsed.perClick : 1,
+                        autoPerSecond: typeof parsed.autoPerSecond === 'number' ? parsed.autoPerSecond : 0,
+                        clickUpgradeLevel: typeof parsed.clickUpgradeLevel === 'number' ? parsed.clickUpgradeLevel : 0,
+                        autoUpgradeLevel: typeof parsed.autoUpgradeLevel === 'number' ? parsed.autoUpgradeLevel : 0,
+                        multiUpgradeLevel: typeof parsed.multiUpgradeLevel === 'number' ? parsed.multiUpgradeLevel : 0,
+                    };
+                } catch (e) {}
+            }
+        }
+
+        function saveGame() {
+            try {
+                localStorage.setItem('clickerState', JSON.stringify(clickerState));
+            } catch (e) {}
+        }
+
+        function updateGameUI() {
+            document.getElementById('clickerScore').textContent = clickerState.score;
+            document.getElementById('clickerPerClick').textContent = clickerState.perClick;
+            document.getElementById('clickerAuto').textContent = clickerState.autoPerSecond;
+
+            const clickLevel = clickerState.clickUpgradeLevel;
+            const autoLevel = clickerState.autoUpgradeLevel;
+            const multiLevel = clickerState.multiUpgradeLevel;
+
+            const clickPrice = clickLevel < upgradePrices.click.length ? upgradePrices.click[clickLevel] : 'MAX';
+            const autoPrice = autoLevel < upgradePrices.auto.length ? upgradePrices.auto[autoLevel] : 'MAX';
+            const multiPrice = multiLevel < upgradePrices.multi.length ? upgradePrices.multi[multiLevel] : 'MAX';
+
+            document.getElementById('priceClick').textContent = clickPrice;
+            document.getElementById('priceAuto').textContent = autoPrice;
+            document.getElementById('priceMulti').textContent = multiPrice;
+
+            document.getElementById('upgradeClick').classList.toggle('locked', clickPrice === 'MAX' || clickerState.score < clickPrice);
+            document.getElementById('upgradeAuto').classList.toggle('locked', autoPrice === 'MAX' || clickerState.score < autoPrice);
+            document.getElementById('upgradeMulti').classList.toggle('locked', multiPrice === 'MAX' || clickerState.score < multiPrice);
+        }
+
+        function buyUpgrade(type) {
+            let level, priceArray, cost, stateKey;
+            if (type === 'click') {
+                level = clickerState.clickUpgradeLevel;
+                priceArray = upgradePrices.click;
+                stateKey = 'clickUpgradeLevel';
+            } else if (type === 'auto') {
+                level = clickerState.autoUpgradeLevel;
+                priceArray = upgradePrices.auto;
+                stateKey = 'autoUpgradeLevel';
+            } else if (type === 'multi') {
+                level = clickerState.multiUpgradeLevel;
+                priceArray = upgradePrices.multi;
+                stateKey = 'multiUpgradeLevel';
+            } else {
+                return;
+            }
+
+            if (level >= priceArray.length) return;
+            cost = priceArray[level];
+            if (clickerState.score < cost) return;
+
+            clickerState.score -= cost;
+
+            if (type === 'click') {
+                clickerState.perClick += 1;
+            } else if (type === 'auto') {
+                clickerState.autoPerSecond += 1;
+            } else if (type === 'multi') {
+                clickerState.perClick *= 2;
+            }
+            clickerState[stateKey] = level + 1;
+
+            saveGame();
+            updateGameUI();
+        }
+
+        function resetGame() {
+            const t = translations[currentLanguage];
+            if (confirm(t.confirm_reset)) {
+                clickerState = {
+                    score: 0,
+                    perClick: 1,
+                    autoPerSecond: 0,
+                    clickUpgradeLevel: 0,
+                    autoUpgradeLevel: 0,
+                    multiUpgradeLevel: 0,
+                };
+                saveGame();
+                updateGameUI();
+            }
+        }
+
+        // ===== HELPER =====
+        function formatDate(dateStr) {
+            const d = new Date(dateStr + 'T00:00:00');
+            const months = currentLanguage === 'ru'
+                ? ['ЯНВ','ФЕВ','МАР','АПР','МАЙ','ИЮН','ИЮЛ','АВГ','СЕН','ОКТ','НОЯ','ДЕК']
+                : ['JAN','FEB','MAR','APR','MAY','JUN','JUL','AUG','SEP','OCT','NOV','DEC'];
+            return d.getDate() + ' ' + months[d.getMonth()];
+        }
+
+        // ===== THEME =====
+        const appWrapper = document.getElementById('appWrapper');
+
+        function applyTheme(theme) {
+            if (theme === 'light') {
+                appWrapper.classList.add('light-theme');
+                appWrapper.classList.remove('dark-theme');
+            } else {
+                appWrapper.classList.remove('light-theme');
+                appWrapper.classList.add('dark-theme');
+            }
+            currentTheme = theme;
+            localStorage.setItem('theme', theme);
+            const toggle = document.getElementById('darkModeToggle');
+            if (toggle) {
+                if (theme === 'dark') toggle.classList.add('active');
+                else toggle.classList.remove('active');
+            }
+        }
+
+        function toggleTheme() {
+            const newTheme = currentTheme === 'light' ? 'dark' : 'light';
+            applyTheme(newTheme);
+        }
+
+        // ===== LANGUAGE =====
+        function updateLanguage() {
+            const lang = currentLanguage;
+            const t = translations[lang];
+
+            document.querySelectorAll('[data-i18n]').forEach(el => {
+                const key = el.getAttribute('data-i18n');
+                if (key && t[key] !== undefined) {
+                    el.textContent = t[key];
+                }
+            });
+
+            document.querySelectorAll('[data-i18n-placeholder]').forEach(el => {
+                const key = el.getAttribute('data-i18n-placeholder');
+                if (key && t[key] !== undefined) {
+                    el.placeholder = t[key];
+                }
+            });
+
+            const langValue = document.getElementById('languageValue');
+            if (langValue) {
+                langValue.textContent = lang === 'ru' ? 'РУССКИЙ' : 'ENGLISH';
+            }
+
+            document.getElementById('modalTitle').textContent = t.modal_title;
+            document.getElementById('noteInput').placeholder = t.modal_placeholder;
+            document.getElementById('modalCancel').textContent = t.modal_cancel;
+            document.getElementById('modalSave').textContent = t.modal_save;
+
+            renderCalendar(currentMonth, currentYear);
+        }
+
+        // ===== RENDER NOTES =====
+        function renderNotes() {
+            const container = document.getElementById('timeline');
+            if (!container) return;
+
+            const t = translations[currentLanguage];
+
+            if (notesData.length === 0) {
+                container.innerHTML = `
+                    <div class="empty-notes">
+                        <span class="emoji">📝</span>
+                        ${t.empty_notes.replace(/\n/g, '<br>')}
+                    </div>
+                `;
+                return;
+            }
+
+            const sorted = [...notesData].sort((a, b) => {
+                if (a.date > b.date) return -1;
+                if (a.date < b.date) return 1;
+                return 0;
+            });
+
+            let html = '';
+            sorted.forEach((note) => {
+                html += `
+                    <div class="timeline-item" data-id="${note.id}">
+                        <span class="timeline-date">${formatDate(note.date)}</span>
+                        <span class="timeline-divider"></span>
+                        <span class="timeline-content">${note.title}</span>
+                        <button class="delete-btn" data-id="${note.id}" aria-label="Удалить">✕</button>
+                        <span class="timeline-arrow">›</span>
+                    </div>
+                `;
+            });
+            container.innerHTML = html;
+
+            container.querySelectorAll('.timeline-item').forEach(el => {
+                el.addEventListener('click', function(e) {
+                    if (e.target.classList.contains('delete-btn')) return;
+                    const content = this.querySelector('.timeline-content')?.textContent?.trim() || 'ЗАМЕТКА';
+                    const t2 = translations[currentLanguage];
+                    alert(t2.demo_click.replace('{title}', content));
+                });
+            });
+
+            container.querySelectorAll('.delete-btn').forEach(btn => {
+                btn.addEventListener('click', function(e) {
+                    e.stopPropagation();
+                    const id = parseInt(this.dataset.id);
+                    this.classList.add('deleting');
+                    setTimeout(() => {
+                        notesData = notesData.filter(n => n.id !== id);
+                        saveNotes();
+                        renderNotes();
+                        const t2 = translations[currentLanguage];
+                        alert(t2.note_deleted);
+                    }, 250);
+                });
+            });
+        }
+
+        // ===== ОЧИСТИТЬ ВСЕ =====
+        document.getElementById('clearAllNotesBtn')?.addEventListener('click', function() {
+            const t = translations[currentLanguage];
+            if (notesData.length === 0) return;
+            if (confirm(t.confirm_delete_all)) {
+                notesData = [];
+                saveNotes();
+                renderNotes();
+                alert(t.all_deleted);
+            }
+        });
+
+        // ===== ПОДДЕРЖАТЬ АВТОРА =====
+        document.getElementById('supportAuthor')?.addEventListener('click', function() {
+            window.open('https://donatex.gg/donate/dart', '_blank');
+        });
+
+        // ===== CALENDAR =====
+        let currentMonth = 7;
+        let currentYear = 2026;
+
+        function renderCalendar(month, year) {
+            const grid = document.getElementById('calendarGrid');
+            const monthDisplay = document.getElementById('monthYearDisplay');
+            if (!grid || !monthDisplay) return;
+
+            const firstDay = new Date(year, month, 1).getDay();
+            const daysInMonth = new Date(year, month + 1, 0).getDate();
+            const daysInPrevMonth = new Date(year, month, 0).getDate();
+
+            const t = translations[currentLanguage];
+            const monthNames = t.months;
+            const dayLabels = t.days_short;
+
+            monthDisplay.textContent = `${monthNames[month]} ${year}`;
+
+            let html = '';
+            dayLabels.forEach(label => {
+                html += `<div class="day-label">${label}</div>`;
+            });
+
+            let startOffset = (firstDay === 0) ? 6 : firstDay - 1;
+
+            for (let i = 0; i < startOffset; i++) {
+                const dayNum = daysInPrevMonth - startOffset + i + 1;
+                html += `<div class="day other-month">${dayNum}</div>`;
+            }
+
+            const today = new Date();
+            const todayStr = `${today.getFullYear()}-${String(today.getMonth()+1).padStart(2,'0')}-${String(today.getDate()).padStart(2,'0')}`;
+
+            for (let d = 1; d <= daysInMonth; d++) {
+                const dateStr = `${year}-${String(month+1).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
+                const isToday = (dateStr === todayStr);
+                let classes = 'day';
+                if (isToday) classes += ' today';
+                html += `<div class="${classes}">${d}</div>`;
+            }
+
+            const totalCells = startOffset + daysInMonth;
+            const remaining = (7 - (totalCells % 7)) % 7;
+            for (let i = 1; i <= remaining; i++) {
+                html += `<div class="day other-month">${i}</div>`;
+            }
+
+            grid.innerHTML = html;
+        }
+
+        // ===== TAB SWITCHING =====
+        const tabButtons = document.querySelectorAll('.tab-item');
+        const screens = {
+            notes: document.getElementById('screen-notes'),
+            calendar: document.getElementById('screen-calendar'),
+            search: document.getElementById('screen-search'),
+            game: document.getElementById('screen-game'),
+            settings: document.getElementById('screen-settings')
+        };
+
+        function switchTab(tabId) {
+            Object.keys(screens).forEach(key => {
+                screens[key].classList.toggle('active', key === tabId);
+            });
+            tabButtons.forEach(btn => {
+                btn.classList.toggle('active', btn.dataset.tab === tabId);
+            });
+            if (tabId === 'calendar') renderCalendar(currentMonth, currentYear);
+            if (tabId === 'search') {
+                // Убираем автофокус, чтобы клавиатура не открывалась автоматически
+                // setTimeout(() => document.getElementById('googleSearchInput')?.focus(), 100); // УДАЛЕНО
+            }
+            if (tabId === 'game') {
+                updateGameUI();
+            }
+        }
+
+        tabButtons.forEach(btn => {
+            btn.addEventListener('click', function() {
+                switchTab(this.dataset.tab);
+            });
+        });
+
+        // ===== GOOGLE SEARCH (исправленный) =====
+        const googleInput = document.getElementById('googleSearchInput');
+        const clearBtn = document.getElementById('googleClearBtn');
+        const searchIcon = document.getElementById('googleSearchIcon');
+
+        function performGoogleSearch(query) {
+            const trimmed = query.trim();
+            if (!trimmed) return;
+            window.open(`https://www.google.com/search?q=${encodeURIComponent(trimmed)}`, '_blank');
+        }
+
+        googleInput.addEventListener('input', function() {
+            if (this.value.length > 0) {
+                clearBtn.classList.add('visible');
+            } else {
+                clearBtn.classList.remove('visible');
+            }
+        });
+
+        clearBtn.addEventListener('click', function() {
+            googleInput.value = '';
+            clearBtn.classList.remove('visible');
+            googleInput.focus(); // фокус для удобства, но клавиатура откроется только если пользователь сам нажмет
+        });
+
+        googleInput.addEventListener('keydown', function(e) {
+            if (e.key === 'Enter') {
+                e.preventDefault();
+                performGoogleSearch(this.value);
+            }
+        });
+
+        // Лупа выполняет поиск, если есть текст, иначе ничего не делает
+        searchIcon.addEventListener('click', function(e) {
+            e.stopPropagation();
+            const query = googleInput.value.trim();
+            if (query) {
+                performGoogleSearch(query);
+            } else {
+                // Если нет текста, можно просто поставить фокус (но пользователь сказал "чтоб так не было" - не ставим)
+                // googleInput.focus(); // не ставим фокус
+            }
+        });
+
+        // Клик по недавним запросам — заполняет поле и выполняет поиск
+        document.querySelectorAll('.recent-item').forEach(item => {
+            item.addEventListener('click', function() {
+                const query = this.dataset.query;
+                if (query) {
+                    googleInput.value = query;
+                    clearBtn.classList.add('visible');
+                    performGoogleSearch(query);
+                }
+            });
+        });
+
+        // ===== МОДАЛЬНОЕ ОКНО =====
+        const modalOverlay = document.getElementById('noteModal');
+        const noteInput = document.getElementById('noteInput');
+
+        function openModal() {
+            noteInput.value = '';
+            modalOverlay.classList.add('active');
+            setTimeout(() => noteInput.focus(), 100);
+        }
+
+        function closeModal() {
+            modalOverlay.classList.remove('active');
+        }
+
+        function saveNote() {
+            const text = noteInput.value.trim();
+            if (text) {
+                const today = new Date().toISOString().slice(0,10);
+                const newNote = {
+                    id: Date.now(),
+                    date: today,
+                    title: text.toUpperCase()
+                };
+                notesData.push(newNote);
+                saveNotes();
+                renderNotes();
+                const t = translations[currentLanguage];
+                alert(t.note_added);
+                closeModal();
+            } else {
+                closeModal();
+            }
+        }
+
+        document.getElementById('notesAddBtn')?.addEventListener('click', openModal);
+        document.getElementById('modalCancel')?.addEventListener('click', closeModal);
+        document.getElementById('modalSave')?.addEventListener('click', saveNote);
+        modalOverlay?.addEventListener('click', function(e) {
+            if (e.target === this) closeModal();
+        });
+        noteInput?.addEventListener('keydown', function(e) {
+            if (e.key === 'Enter' && (e.ctrlKey || e.metaKey)) {
+                e.preventDefault();
+                saveNote();
+            }
+        });
+
+        // ===== CALENDAR NAV =====
+        document.getElementById('prevMonthBtn')?.addEventListener('click', function() {
+            if (currentMonth === 0) { currentMonth = 11; currentYear--; }
+            else currentMonth--;
+            renderCalendar(currentMonth, currentYear);
+        });
+        document.getElementById('nextMonthBtn')?.addEventListener('click', function() {
+            if (currentMonth === 11) { currentMonth = 0; currentYear++; }
+            else currentMonth++;
+            renderCalendar(currentMonth, currentYear);
+        });
+        document.getElementById('calendarTodayBtn')?.addEventListener('click', function() {
+            const today = new Date();
+            currentMonth = today.getMonth();
+            currentYear = today.getFullYear();
+            renderCalendar(currentMonth, currentYear);
+        });
+
+        // ===== SETTINGS =====
+        document.getElementById('themeToggleRow')?.addEventListener('click', toggleTheme);
+        document.getElementById('darkModeToggle')?.addEventListener('click', function(e) {
+            e.stopPropagation();
+            toggleTheme();
+        });
+        document.getElementById('notifToggleRow')?.addEventListener('click', function() {
+            document.getElementById('notifToggle').classList.toggle('active');
+        });
+        document.getElementById('languageSwitch')?.addEventListener('click', function() {
+            currentLanguage = (currentLanguage === 'ru') ? 'en' : 'ru';
+            updateLanguage();
+        });
+
+        // ===== ИГРА =====
+        const mainBtn = document.getElementById('clickerMainBtn');
+        mainBtn?.addEventListener('click', function(e) {
+            clickerState.score += clickerState.perClick;
+            this.style.transform = 'scale(0.9)';
+            setTimeout(() => { this.style.transform = ''; }, 100);
+            saveGame();
+            updateGameUI();
+        });
+
+        document.getElementById('upgradeClick')?.addEventListener('click', function() {
+            if (!this.classList.contains('locked')) buyUpgrade('click');
+        });
+        document.getElementById('upgradeAuto')?.addEventListener('click', function() {
+            if (!this.classList.contains('locked')) buyUpgrade('auto');
+        });
+        document.getElementById('upgradeMulti')?.addEventListener('click', function() {
+            if (!this.classList.contains('locked')) buyUpgrade('multi');
+        });
+
+        document.getElementById('resetGameBtn')?.addEventListener('click', resetGame);
+
+        setInterval(() => {
+            if (clickerState.autoPerSecond > 0) {
+                clickerState.score += clickerState.autoPerSecond;
+                saveGame();
+                const gameScreen = document.getElementById('screen-game');
+                if (gameScreen.classList.contains('active')) {
+                    updateGameUI();
+                }
+            }
+        }, 1000);
+
+        // ===== INIT =====
+        const savedTheme = localStorage.getItem('theme') || 'dark';
+        applyTheme(savedTheme);
+
+        loadNotes();
+        loadGame();
+
+        renderNotes();
+        renderCalendar(currentMonth, currentYear);
+        updateLanguage();
+        updateGameUI();
+
+        console.log('✅ АВТОФОКУС ПОИСКА УБРАН, ЛУПА ВЫПОЛНЯЕТ ПОИСК!');
+    })();
+</script>
+</body>
+</html>
